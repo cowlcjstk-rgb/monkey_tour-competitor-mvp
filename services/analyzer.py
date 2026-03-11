@@ -1,15 +1,27 @@
-from openai import OpenAI
-import streamlit as st
 import json
 import pandas as pd
+import streamlit as st
+from google import genai
+from google.genai import types
 
 from config.prompts import ANALYSIS_PROMPT
 
-def get_openai_client():
-    api_key = st.secrets.get("OPENAI_API_KEY")
+ANALYSIS_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "positioning": {"type": "string"},
+        "our_strengths": {"type": "array", "items": {"type": "string"}},
+        "our_weaknesses": {"type": "array", "items": {"type": "string"}},
+        "action_items": {"type": "array", "items": {"type": "string"}},
+    },
+    "required": ["positioning", "our_strengths", "our_weaknesses", "action_items"],
+}
+
+def get_gemini_client():
+    api_key = st.secrets.get("GEMINI_API_KEY")
     if not api_key:
-        raise ValueError("OPENAI_API_KEY가 Streamlit secrets에 설정되지 않았습니다.")
-    return OpenAI(api_key=api_key)
+        raise ValueError("GEMINI_API_KEY가 Streamlit secrets에 설정되지 않았습니다.")
+    return genai.Client(api_key=api_key)
 
 def build_comparison_table(products: list[dict]) -> pd.DataFrame:
     labels = [
@@ -47,21 +59,29 @@ def build_comparison_table(products: list[dict]) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 def analyze_products(products: list[dict]) -> dict:
-    client = get_openai_client()
-    prompt = f"{ANALYSIS_PROMPT}\n\n데이터:\n{json.dumps(products, ensure_ascii=False)}"
+    client = get_gemini_client()
 
-    response = client.responses.create(
-        model="gpt-5-mini",
-        input=prompt
+    prompt = f"""
+{ANALYSIS_PROMPT}
+
+데이터:
+{json.dumps(products, ensure_ascii=False)}
+"""
+
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            response_mime_type="application/json",
+            response_json_schema=ANALYSIS_SCHEMA,
+        ),
     )
 
-    text_output = response.output_text
-
     try:
-        return json.loads(text_output)
+        return json.loads(response.text)
     except Exception:
         return {
-            "positioning": text_output,
+            "positioning": response.text,
             "our_strengths": [],
             "our_weaknesses": [],
             "action_items": [],
