@@ -4,5 +4,5 @@ beautifulsoup4
 pandas
 gspread
 google-auth
-openai
+google-genai
 lxml
