@@ -16,7 +16,7 @@ comp_a = st.text_input("경쟁사 A URL")
 comp_b = st.text_input("경쟁사 B URL")
 comp_c = st.text_input("경쟁사 C URL")
 
-category = st.selectbox("카테고리", ["섬투어", "입장권", "스파", "차량", "기타"])
+category = st.selectbox("카테고리", ["투어", "입장권", "스파", "차량", "기타"])
 
 if st.button("비교표 생성"):
     urls = [our_url, comp_a, comp_b, comp_c]
