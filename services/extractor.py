@@ -4,9 +4,15 @@ import streamlit as st
 
 from config.prompts import EXTRACTION_PROMPT
 
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+def get_openai_client():
+    api_key = st.secrets.get("OPENAI_API_KEY")
+    if not api_key:
+        raise ValueError("OPENAI_API_KEY가 Streamlit secrets에 설정되지 않았습니다.")
+    return OpenAI(api_key=api_key)
 
 def extract_product_data(page_text: str, url: str, category: str) -> dict:
+    client = get_openai_client()
+
     if page_text.startswith("SCRAPE_ERROR:"):
         return {
             "source_name": url,
