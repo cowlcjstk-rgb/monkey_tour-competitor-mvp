@@ -1,11 +1,15 @@
-import pandas as pd
 from openai import OpenAI
-import json
 import streamlit as st
+import json
+import pandas as pd
 
 from config.prompts import ANALYSIS_PROMPT
 
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+def get_openai_client():
+    api_key = st.secrets.get("OPENAI_API_KEY")
+    if not api_key:
+        raise ValueError("OPENAI_API_KEY가 Streamlit secrets에 설정되지 않았습니다.")
+    return OpenAI(api_key=api_key)
 
 def build_comparison_table(products: list[dict]) -> pd.DataFrame:
     labels = [
@@ -43,6 +47,7 @@ def build_comparison_table(products: list[dict]) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 def analyze_products(products: list[dict]) -> dict:
+    client = get_openai_client()
     prompt = f"{ANALYSIS_PROMPT}\n\n데이터:\n{json.dumps(products, ensure_ascii=False)}"
 
     response = client.responses.create(
