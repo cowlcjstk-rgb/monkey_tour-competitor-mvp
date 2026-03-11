@@ -8,7 +8,7 @@ def get_gspread_client():
 
 def save_run_results(run_id: str, category: str, urls: list[str], comparison_df, analysis: dict):
     client = get_gspread_client()
-    sheet = client.open(st.secrets["GOOGLE_SHEET_NAME"])
+    sheet = client.open_by_key(st.secrets["GOOGLE_SHEET_ID"])
 
     input_ws = sheet.worksheet("input_history")
     analysis_ws = sheet.worksheet("analysis_results")
