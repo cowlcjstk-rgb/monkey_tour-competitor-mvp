@@ -1,0 +1,18 @@
+PRODUCT_KEYS = [
+    "source_name",
+    "url",
+    "product_name",
+    "price",
+    "currency",
+    "tour_type",
+    "duration",
+    "pickup",
+    "included",
+    "excluded",
+    "highlights",
+    "child_policy",
+    "cancellation_policy",
+    "options",
+    "summary_strength",
+    "summary_weakness",
+]
